@@ -7,7 +7,7 @@
 [![Gem Version](https://badge.fury.io/rb/ruby_motion_query.png)](http://badge.fury.io/rb/ruby_motion_query)
 [![Crusher.io optimized](http://www.crusher.io/repo/infinitered/rmq/badge)](http://www.crusher.io/repo/infinitered/rmq)
 
-A fast, non-polluting, chaining, front-end library. It’s jQuery for [RubyMotion](http://rubymotion.com), plus stylesheets and templates
+A fast, non-polluting, chaining, front-end library. It’s like jQuery for [RubyMotion](http://rubymotion.com). Templates, stylesheets, events, animations, etc.
 
 **The [RMQ website][1] is a great place to start.**
 
@@ -20,21 +20,27 @@ And this 36 minute video: **[Creating an Image Browser app in RubyMotion and Rub
 ## General
 
 ### Some of the very cool features:
- - **selecting** (*querying*) views
- - **traversal** through view hierarchy (moving around the tree)
- - tagging
- - **events and gestures**
+ - events and gestures
+ - view factory
+ - stylesheets
+ - actions
+ - position
+ - selecting (_querying views_)
+ - templates
+ - traversal through view hierarchy (moving around the tree)
  - animations
- - **stylers and stylesheets**
+ - tagging
  - colors
  - fonts
  - image utilities
  - app
  - device
 
+[![features](https://ir_wp.s3.amazonaws.com/wp-content/uploads/sites/11/2014/03/rmq_parts-300x231.png)](https://ir_wp.s3.amazonaws.com/wp-content/uploads/sites/11/2014/03/rmq_parts.png)
+
 ----------
 
-**Tested on iOS, not OS X (nor is there any OS X specific code)**
+**RMQ only works in iOS, not OS X**
 
 ----------
 
@@ -98,9 +104,19 @@ for **bleeding edge**, add this to your `Gemfile`:
 - **UIView#rmq_did_create(self_in_rmq)** - *Use rmq_build instead*
 
 
+<br />
+
 ## Usage
 
+----
+
+
+<br />
+
 ### Example App
+
+----
+
 *Clone this repo and run the example app to see an example of use.*
 
 	git clone git@github.com:infinitered/rmq.git
@@ -109,7 +125,13 @@ for **bleeding edge**, add this to your `Gemfile`:
 
 The example app works in any orientation, on both iPhone and iPad. Notice how the benchmark popup is done with RMQ, then think about how you'd do that without it.
 
+
+
+<br />
+
 ### What's an rmq instance?
+
+----
 
  - an rmq instance is an array-like object containing UIViews
  - rmq() never returns nil. If nothing is selected, it's an empty [ ] array-like
@@ -124,7 +146,12 @@ The example app works in any orientation, on both iPhone and iPad. Notice how th
    controller that the view is currently in or to the current screen's
    controller
 
+
+<br />
+
 ### Basic syntax
+
+----
 
 The main command is `rmq` and you use it everywhere. You can rename this by aliasing the methods in `ext.rb`.
 
@@ -179,7 +206,12 @@ rmq(my_view).get
 rmq(UILabel).get
 ```
 
+
+<br />
+
 ### Command-line Tool
+
+----
 
 RMQ provides a command-line tool, mostly for generating files:
 ```
@@ -208,8 +240,11 @@ Here are the commands available to you:
 ```
 
 
+<br />
 
 ### Selectors
+
+----
 
  - Constant
  - :a_tag
@@ -218,13 +253,18 @@ Here are the commands available to you:
  - text: 'you can select via attributes also'
  - :another_tag, UILabel, text: 'an array' <- this is an "or", use .and for and
 
+
+<br />
+
 ### Traversing
+
+----
 
  - all
  - and
  - not
  - and_self
- - back  - rmq(test_view).find(UIImageView).tag(:foo).back.find(UILabel).tag(:bar) 
+ - back  - rmq(test_view).find(UIImageView).tag(:foo).back.find(UILabel).tag(:bar)
  - find
  - children
  - siblings
@@ -239,7 +279,12 @@ Here are the commands available to you:
  - window # Window of the root_view
 
 
+<br />
+
 ### Enumerablish
+
+----
+
 A rmq object is like an enumerable, but each method returns a rmq object instead of a enumerable. For example, these methods:
 
  - each
@@ -260,7 +305,12 @@ You can also do **rmq.length** and **rmq[0]** like an array
 
 **.to_a** gives you an actual array, so will **.get** (this is preferred)
 
+
+<br />
+
 ### Events and Gestures
+
+----
 
 #### On / Off
 
@@ -292,6 +342,7 @@ In RMQ events and gestures are normalized with the same API. For example removin
 If you see Event, just remember that's either an event or gesture. I decided to call them Events
 
 ##### Type of events and gestures
+
 ```ruby
 # Events on controls
 :touch
@@ -355,7 +406,12 @@ TODO, need many examples here
 
 The internal store of events in a UIView. It's rmq.events, you won't use it too often
 
+
+<br />
+
 ### Tags
+
+----
 
 ```ruby
 # Add tags
@@ -380,7 +436,13 @@ your_view.rmq_data.has_tag?(:foo)
 your_view.rmq_data.tag_names
 ```
 
+
+<br />
+
 ### Actions
+
+----
+
 ```ruby
 rmq(UILabel).attr(text: 'Foo bar')
 rmq(UILabel).send(:some_method, args)
@@ -391,7 +453,12 @@ rmq(my_view).toggle_enabled
 rmq(my_text_field).focus # or .become_first_responder
 ```
 
+
+<br />
+
 ### Subviews - appending, creating, etc
+
+----
 
 ```ruby
 rmq.append(UILabel) # Creates a UILabel in the current controller
@@ -440,7 +507,12 @@ class StoreCell < UITableViewCell
 end
 ```
 
+
+<br />
+
 ### Animate
+
+----
 
 ```ruby
 rmq(my_view).animate(
@@ -471,7 +543,12 @@ rmq(selectors).animate(
 # You can pass any options that animateWithDuration allows: options: YOUR_OPTIONS
 ```
 
+
+<br />
+
 ### Animations
+
+----
 
 #### Current animations included:
 
@@ -489,7 +566,12 @@ rmq.animations.start_spinner
 rmq.animations.stop_spinner
 ```
 
+
+<br />
+
 ### Color
+
+----
 
 ```ruby
 rmq.color.red
@@ -507,7 +589,11 @@ color.pitch_black
 color.red
 ```
 
+<br />
+
 ### Font
+
+----
 
 ```ruby
 rmq.font.system(12)
@@ -530,24 +616,89 @@ font.medium
 font.system(14)
 ```
 
+
+<br />
+
 ### Position (moving, sizing, and nudging)
 
+----
+
 ```ruby
-# Move/Size changes size and origin of selected view(s)
-rmq(your_view).move(l: 20)
-rmq(your_view).move(left: 20)
-rmq(your_view).move(l: 20, t: 20, w: 100, h: 50)
-rmq(your_view).move(left: 20, top: 20, width: 100, height: 50)
-rmq(your_view).size(left: 20, top: 20, width: 100, height: 50) # alias
+# Layout, move, or resize selected views
+rmq(your_view).layout(left: 20, top: 20, width: 100, height: 50)
+rmq(your_view).layout(l: 20)
+rmq(your_view).layout(left: 20)
+rmq(your_view).layout(l: 20, t: 20, w: 100, h: 50)
+rmq(your_view).layout(left: 20, top: 20, width: 100, height: 50)
+
+rmq(your_view).move(left: 20) # alias for layout
+rmq(your_view).move(l: 30, t: 50) # alias for layout
+rmq(your_view).resize(width: 100, height: 50) # alias for layout
 
 # Nudge pushes them in a direction
 rmq(your_view).nudge(d: 20)
 rmq(your_view).nudge(down: 20)
 rmq(your_view).nudge(l: 20, r: 20, u: 100, d: 50)
 rmq(your_view).nudge(left: 20, right: 20, up: 100, down: 50)
+
+# Distribute
+rmq(UIButton).distribute
+rmq(UIButton).distribute(:vertical)
+rmq(UIButton).distribute(:horizontal)
+rmq(UIButton).distribute(:vertical, margin: 20)
+rmq(my_view, my_other_view, third_view).distribute(:vertical, margin: 10)
+rmq(UIButton).distribute(:vertical, margins: [5,5,10,5,10,5,10,20])
 ```
 
+<br />
+
 ### Images
+
+----
+
+
+RMQ provides various features for dealing with images.
+
+If you want to load an image from your **/resources** folder (_which is where they should be_), you can either load it and cache it (**imageNamed**) or load it and not cache it (**NSBundle.mainBundle.pathForResource**):
+
+```ruby
+ rmq.image.resource('foo')  # /resources/foo@2x.png
+ rmq.image.resource('foo', cached: false)
+ # In a stylesheet
+ st.background_image = image.resource('foo')
+```
+
+**Capped images**
+
+Sometimes when you apply a background_image to a view you want the image to stretch to the size of the view without stretching the corners of the image, for example if you're making a rounded button. The SDK has a nice feature for this, called UIImage#resizableImageWithCapInsets. It stretches the center of your image, but not the corners.
+
+Let's say you want to create this, like we did in [Temple](http://app.temple.cx/):
+
+![Bar](https://ir_wp.s3.amazonaws.com/wp-content/uploads/sites/18/2014/03/bar.png)
+
+The red bar grows horizontally. But it has rounded caps. So we created this image ![Cap image](https://ir_wp.s3.amazonaws.com/wp-content/uploads/sites/18/2014/03/bar_poor@2x.png), which is the caps, plus one pixel to stretch. Here it is blown up and I dimmed the 4 caps:
+
+![Cap image](https://ir_wp.s3.amazonaws.com/wp-content/uploads/sites/18/2014/03/blown_up.png)
+
+Basically just the center line of it stretches, the other 4 quadrants do not. RMQ makes this very easy. You create a UIImageView, then in the style (or anywhere) you set the image like so:
+
+```ruby
+ rmq.append(UIImageView, :your_style)
+ # Then in your style
+ st.image = image.resource_resizable('your_image', top: 4, left: 4, right: 4, bottom: 4)
+```
+
+The top, left, etc, tell which parts of the image not to stretch. You can now resize your view and it will look great.
+
+**Snapshot of a view**
+
+Lastly you can get an image of a view, meaning a "screenshot" of it:
+
+```ruby
+ my_image_view.image = rmq.image.from_view(some_view)
+```
+
+**Other examples**
 
 ```ruby
 RubyMotionQuery::ImageUtils.resource('logo')
@@ -564,7 +715,13 @@ rmq.image.from_view(my_view)
 image.resource('logo')
 ```
 
+
+<br />
+
 ### App
+
+----
+
 ```ruby
 RubyMotionQuery::App.window
 rmq.app.window
@@ -580,7 +737,12 @@ rmq.app.resource_path
 rmq.app.document_path
 ```
 
+
+<br />
+
 ### Device
+
+----
 
 ```ruby
 RubyMotionQuery::Device.screen
@@ -599,7 +761,13 @@ rmq.device.landscape?
 rmq.device.portrait?
 ```
 
+
+<br />
+
 ### Format
+
+----
+
 A performant way to format numbers and dates.
 
 ```ruby
@@ -610,7 +778,12 @@ rmq.format.date_formatter(your_format_here) # returns cached date formatter
 ```
 See <http://www.unicode.org/reports/tr35/tr35-19.html#Date_Format_Patterns> for more information about date format strings.
 
+
+<br />
+
 ### Utils
+
+----
 
 These are mostly used internally by rmq.
 
@@ -622,7 +795,12 @@ RubyMotionQuery::RMQ.view_to_s(view)
 RubyMotionQuery::RMQ.weak_ref(foo)
 ```
 
+
+<br />
+
 ### Pollution
+
+----
 
 The following are the only pollution in RMQ
 
@@ -635,16 +813,28 @@ The following are the only pollution in RMQ
  - Object
     - rmq
 
+
+<br />
+
 ### Console Fun
 
-  rmq.log :tree
-	rmq.all.log
-	rmq.all.log :wide
-	rmq(UIView).show
-	rmq(UILabel).animations.blink
-	rmq(UIButton).nudge l: 10
+----
+
+```ruby
+rmq.log :tree
+rmq.all.log
+rmq.all.log :wide
+rmq(UIView).show
+rmq(UILabel).animations.blink
+rmq(UIButton).nudge l: 10
+```
+
+
+<br />
 
 ### A recommended project structure
+
+----
 
  - app
    - controllers
@@ -672,7 +862,12 @@ The following are the only pollution in RMQ
    - stylers
    - views
 
+
+<br />
+
 ### Debugging
+
+----
 
 Adding rmq_debug=true to rake turns on some debugging features that are too slow or verbose to include in a normal build.  It's great for normal use in the simulator, but you'll want to leave it off if you're measuring performance.
 ```
@@ -702,9 +897,12 @@ rmq(UILabel).animations.blink
 rmq(Section).parent.children.log
 ```
 
-----------
+
+<br />
 
 ### Styles and stylesheets
+
+----
 
 A very lightweight style system, designed for a low memory footprint, fast startup, and fast operation. Most everything is done at compile-time, as it's all just ruby code. Low magic.
 
@@ -718,7 +916,7 @@ class MainController < UIViewController
   def viewDidLoad
     super
 
-    rmq.stylesheet = MainControllerStyleSheet
+    rmq.stylesheet = MainStyleSheet # Each controller has its own stylesheet
     view.rmq.apply_style :root_view
 
     @title_label = rmq.append(UILabel, :title_label).get
@@ -1048,6 +1246,18 @@ def ui_button_kitchen_sink(st)
 end
 ```
 
+Now supported:
+
+```
+st.border_color  = rmq.color.blue
+st.border_width  = 1
+st.corner_radius = 3
+```
+
+Note: If you set width without color, nothing happens. If you set anyting
+without width, nothing happens. In fact, there are a lot of places where
+iOS will allow this to fail silently. Set all three. Caveat programmer.
+
 ##### UIImageViewStyler
 
 ```ruby
@@ -1099,7 +1309,11 @@ end
 You can also include all of your custom stylers in one file, which works well if you don't have a lot.
 
 
+<br />
+
 ### Creating your own views
+
+----
 
 RMQ calls 3 methods when you create, append, or build a view using rmq. rmq_build is the one you most want to use
 ```ruby
@@ -1142,11 +1356,15 @@ end
 rmq.append(YourView, :your_style)
 ```
 
+
+<br />
+
 ### Future features
+
+----
 
 Current roadmap:
 
-- v0.5 new view_controller system: which solves the #1 problem in rmq: having to pass rmq around in things like cells. rmq command will work everywhere
 - v0.6 new frame system: I’ve already designed this, I just have to implement it and use it in the real world and tweak. This is going to be very cool. It adds to the existing frame system. It doesn’t replace constraints, but rather gives you almost all the features you need without the complexity of constraints.
 - v0.6.5 templates and stylers all finished
 - v0.6.7 performance improvements
@@ -1172,7 +1390,12 @@ Random future features that I plan on adding
 - add rmq.help with basic help for when you're in repl
 
 
-## Contact
+
+<br />
+
+### Contact
+
+----
 
 created by **Todd Werth** ([http://toddwerth.com](http://toddwerth.com))
 
@@ -1186,11 +1409,21 @@ with help from the team at **InfiniteRed** ([http://infinitered.com](http://infi
 - [github](https://github.com/infinitered)
 
 
-## License
+
+<br />
+
+### License
+
+----
 
 RMQ is available under the MIT license. See the LICENSE file for more info.
 
-## Contributing
+
+<br />
+
+### Contributing
+
+----
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
