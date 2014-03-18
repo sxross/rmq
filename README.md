@@ -67,8 +67,8 @@ Or, if you use **rbenv**:
 
 ```
 gem install ruby_motion_query
-rmq create my_app
 rbenv rehash
+rmq create my_app
 cd my_app
 bundle
 rake
@@ -697,7 +697,6 @@ Basically just the center line of it stretches, the other 4 quadrants do not. RM
 
 ```ruby
  rmq.append(UIImageView, :your_style)
-
  # Then in your style
  st.image = image.resource_resizable('your_image', top: 4, left: 4, right: 4, bottom: 4)
 ```

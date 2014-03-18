@@ -26,6 +26,7 @@ describe 'stylers/ui_button' do
       # TODO
       1.should == 1
     end
+
   end
 
   describe "bordered button extensions" do
@@ -77,4 +78,8 @@ describe 'stylers/ui_button' do
       end
     end
   end
+<<<<<<< HEAD
+=======
+
+>>>>>>> 0fb018c2b447a7aa15dc2df184d258b7a5f2d73a
 end
