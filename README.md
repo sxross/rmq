@@ -206,24 +206,25 @@ rmq(my_view).get
 rmq(UILabel).get
 ```
 
-
-<br />
-
-### Command-line Tool
+### Command-line Tool and Generators
 
 ----
 
-RMQ provides a command-line tool, mostly for generating files:
+Like Rails, RMQ provides a command-line tool, mostly for generating files. **Create a new app**:
+
 ```
 > rmq create my_app
 ```
 
-Here are the commands available to you:
-```
- > rmq api
- > rmq docs
+To get all the commands available just do:
 
- > rmq create my_new_app
+```
+> rmq
+```
+
+To generate **controllers, models, views**, etc, do the following:
+
+```
  > rmq create model foo
  > rmq create controller bar
  > rmq create view foo_bar
@@ -233,12 +234,24 @@ Here are the commands available to you:
  > rmq create collection_view_controller foos
  > rmq create table_view_controller bars
 
- # To test the create command without actually creating any files, do:
  > rmq create view my_view dry_run
-
- > rmq help
 ```
 
+I recomend you play around with it, do this:
+
+```
+> cd
+> cd Desktop
+> rmq create test_rmq_app
+> cd test_rmq_app
+> rmq create table_view_controller people
+> rmq create view group
+> bundle
+> rake
+```
+
+
+<br />
 
 <br />
 
@@ -670,7 +683,11 @@ If you want to load an image from your **/resources** folder (_which is where th
 
 **Capped images**
 
+<<<<<<< HEAD
 Sometimes when you apply a background_image to a view you want the image to stretch to the size of the view without stretching the corners of the image, for example if you're making a rounded button. The SDK has a nice feature for this, called UIImage#resizableImageWithCapInsets. It stretches the center of your image, but not the corners.
+=======
+Sometimes when you apply a background_image to a view you want the image to stretch to the size of the view without stretching the corners of the image, for example if you're making a rounded button. The SDK has a nice feature for this, called UIImage#resizableImageWithCapInsets. It stretches the center of your image, but not the corners.
+>>>>>>> upstream/master
 
 Let's say you want to create this, like we did in [Temple](http://app.temple.cx/):
 
@@ -684,7 +701,11 @@ Basically just the center line of it stretches, the other 4 quadrants do not. RM
 
 ```ruby
  rmq.append(UIImageView, :your_style)
+<<<<<<< HEAD
  # Then in your style
+=======
+ # Then in your style
+>>>>>>> upstream/master
  st.image = image.resource_resizable('your_image', top: 4, left: 4, right: 4, bottom: 4)
 ```
 
