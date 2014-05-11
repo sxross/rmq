@@ -4,8 +4,9 @@ module RubyMotionQuery
     # Animate
     #
     # @return [RMQ]
-    def animate(opts = {})
-      animations_callback = (opts[:animations] || opts[:changes])
+    def animate(opts = {}, &block)
+      
+      animations_callback = (block || opts[:animations] || opts[:changes])
       after_callback = (opts[:completion] || opts[:after])
       return self unless animations_callback
 
@@ -87,15 +88,15 @@ module RubyMotionQuery
 
     # @return [RMQ]
     def throb(opts = {})
-      opts.merge!({
+      opts = {
         duration: 0.4,
         animations: ->(cq) {
           cq.style {|st| st.scale = 1.0}
         }
-      })
+      }.merge(opts)
 
       out = @rmq.animate(
-        duration: 0.1,
+        duration: opts[:duration_out] || 0.1,
         animations: ->(q) {
           q.style {|st| st.scale = 1.1}
         },
@@ -109,9 +110,58 @@ module RubyMotionQuery
     end
 
     # @return [RMQ]
+    def sink_and_throb(opts = {})
+      opts = {
+        duration: 0.3,
+        animations: ->(cq) {
+         cq.animations.throb(duration: 0.6)
+        }
+      }.merge(opts)
+
+      out = @rmq.animate(
+        duration: opts[:duration_out] || 0.1,
+        animations: ->(q) {
+          q.style {|st| st.scale = 0.9}
+        },
+        completion: ->(did_finish, completion_rmq) {
+          if did_finish
+            completion_rmq.animate(opts)
+          end
+        }
+      )
+      out
+    end
+
+    # @return [RMQ]
+    def land_and_sink_and_throb(opts = {})
+      @rmq.hide.style do |st|
+        st.opacity = 0.1
+        st.scale = 8.0
+        st.hidden = false
+      end
+
+      opts = {
+        duration: 0.5,
+        animations: ->(cq) {
+          cq.style do |st| 
+            st.opacity = 1.0
+            st.scale = 0.8
+          end
+        },
+        completion: ->(did_finish, last_completion_rmq) {
+          if did_finish
+            last_completion_rmq.animations.throb
+          end
+        }
+      }.merge(opts)
+
+      @rmq.animate(opts)
+    end
+
+    # @return [RMQ]
     def drop_and_spin(opts = {})
       remove_view = opts[:remove_view]
-      opts.merge!({
+      opts = {
         duration: 0.4 + (rand(8) / 10),
         options: UIViewAnimationOptionCurveEaseIn|UIViewAnimationOptionBeginFromCurrentState,
         animations: ->(cq) {
@@ -133,7 +183,7 @@ module RubyMotionQuery
             end
           end
         }
-      })
+      }.merge(opts)
 
       @rmq.animate(opts)
     end

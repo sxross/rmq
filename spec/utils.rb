@@ -36,25 +36,45 @@ describe 'utils' do
     v = UIView.alloc.initWithFrame(CGRectZero)
     s = @rmq.view_to_s(v)
     s.is_a?(String) == true
-    (s =~ /.*VIEW.*/).should == 1 
+    (s =~ /.*VIEW.*/).should == 1
+  end
+
+  it 'should be able to tell if an object is a weak ref when using RubyMotionQuery::RMQ.weak_ref' do
+    bar = 'hi there'
+    weak_bar = RubyMotionQuery::RMQ.weak_ref(bar)
+    RubyMotionQuery::RMQ.is_object_weak_ref?(bar).should == false
+    RubyMotionQuery::RMQ.is_object_weak_ref?(weak_bar).should == true
+  end
+
+  it 'should be able to tell if an object is a weak ref when using WeakRef.new' do
+    foo = 'Foo'
+    weak_foo = WeakRef.new(foo)
+
+    RubyMotionQuery::RMQ.is_object_weak_ref?(foo).should == false
+    RubyMotionQuery::RMQ.is_object_weak_ref?(weak_foo).should == true
   end
 
   it 'should not wrap a weak ref inside another weak ref' do
-    foo = 'hi'
-
     # RM's standard WeakRef will wrap a weak ref inside aonther weak ref
-    # THIS IS NO LONGER TRUE IN RubyMotion 2.17, disabling test
-    #rm_weak = WeakRef.new(foo)
-    #rm_weak.is_a?(String).should == true
-    #rm_weak = WeakRef.new(rm_weak)
-    #rm_weak.is_a?(WeakRef).should == true
+    # and weakref_alive? then becomes useless
+    autorelease_pool do
+      @bar = 'bar'
+      @bar_weak = WeakRef.new(@bar)
+      @bar_weak_in_weak = WeakRef.new(@bar_weak)
+      @bar = nil
+    end
+    @bar_weak.weakref_alive?.should == false
+    @bar_weak_in_weak.weakref_alive?.should == true # Wat
 
-    # Now make sure rmq's does not
-    weak = RubyMotionQuery::RMQ.weak_ref(foo)
-    weak.is_a?(String).should == true
-    weak = RubyMotionQuery::RMQ.weak_ref(weak)
-    weak.is_a?(WeakRef).should == false
-    weak.is_a?(String).should == true
+    # Now make sure rmq's does not that
+    autorelease_pool do
+      @foo = 'foo'
+      @foo_weak = RubyMotionQuery::RMQ.weak_ref(@foo)
+      @foo_weak_in_weak = RubyMotionQuery::RMQ.weak_ref(@foo_weak)
+      @foo = nil
+    end
+    @foo_weak.weakref_alive?.should == false
+    @foo_weak_in_weak.weakref_alive?.should == false
   end
 
   it 'should convert a weak ref into a strong ref' do
@@ -63,7 +83,8 @@ describe 'utils' do
     strong_s = RubyMotionQuery::RMQ.weak_ref_to_strong_ref(weak_s)
     strong_s.should == weak_s
     strong_s.object_id.should == s.object_id
-    # TODO, test weather strong_s is really a strong reference
+    strong_s.is_a?(WeakRef).should == false
+    strong_s.is_a?(String).should == true
   end
 
   describe 'utils - controller_for_view' do
@@ -97,6 +118,4 @@ describe 'utils' do
       @rmq.controller_for_view(sub_sub_view).should == controller
     end
   end
-
-
 end

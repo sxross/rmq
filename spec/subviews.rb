@@ -9,6 +9,12 @@ describe 'subviews' do
     @vc.view.subviews.first.should == view
   end
 
+  it 'should append! view to a controller and return view without .get' do
+    view = @vc.rmq.append!(UIView)
+    @vc.view.subviews.length.should == 1
+    @vc.view.subviews.first.should == view
+  end
+
   it 'should addend to the end of the subviews' do
     view = @vc.rmq.append(UIView).get
     @vc.view.subviews[@vc.view.subviews.length - 1].should == view
@@ -38,6 +44,9 @@ describe 'subviews' do
     view2 = @vc.rmq.append(UIButton).get
     view.rmq_data.style_name.should == :my_style
     view2.rmq_data.style_name.nil?.should == true
+
+    view3 = @vc.rmq.append(SubButtonTest).get
+    view3.class.should == SubButtonTest
   end
 
   it 'should unshift a view to the front of the subviews' do
@@ -52,6 +61,13 @@ describe 'subviews' do
     view = @vc.rmq.unshift(UIView, :my_style).get
     @vc.view.subviews[0].should == view
     view.rmq_data.style_name.should == :my_style
+  end
+
+  it 'should unshift! view to a controller and return view without .get' do
+    view = @vc.rmq.unshift!(UIView)
+    view2 = @vc.rmq.unshift!(UIView)
+    @vc.view.subviews.length.should == 2
+    @vc.view.subviews.first.should == view2
   end
 
   # TODO test ops in append, unshift, and create
@@ -155,6 +171,38 @@ describe 'subviews' do
       test_view.subview.rmq_data.style_name.should == :create_sub_view_style
       test_view.subview.backgroundColor.should == RubyMotionQuery::Color.orange
     end
+
+    it 'should create a default table cell' do
+      q = @vc.rmq
+      cell = q.append(UITableViewCell, nil, reuse_identifier: 'bar').get
+      cell.should != nil
+    end
+
+    it 'should allow you to create a table cell while specifying the cell style' do
+      q = @vc.rmq
+      cell = q.append(UITableViewCell, nil, reuse_identifier: 'foo', cell_style: UITableViewCellStyleSubtitle).get
+      cell.detailTextLabel.should != nil
+      detail_label = q.build(cell.detailTextLabel).get
+      detail_label.should != nil
+    end
+
+    it 'should allow you to create a UITableView while specifying the table_style' do
+      q = @vc.rmq
+
+      table = q.append(UITableView).get
+      table.style.should == UITableViewStylePlain
+
+      table = q.append(UITableView, nil, table_style: UITableViewStyleGrouped).get
+      table.style.should == UITableViewStyleGrouped
+
+      table = q.append(UITableView, nil, table_style: UITableViewStylePlain).get
+      table.class.should == UITableView
+      table.style.should == UITableViewStylePlain
+
+      table_sub = q.append(SubTableTest, nil, table_style: UITableViewStyleGrouped).get
+      table_sub.class.should == SubTableTest
+      table_sub.style.should == UITableViewStyleGrouped
+    end
   end
 
   describe 'build' do
@@ -225,4 +273,8 @@ class SubviewTestView < UIView
   end
 end
 
+class SubTableTest < UITableView
+end
 
+class SubButtonTest < UIButton
+end

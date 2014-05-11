@@ -87,12 +87,12 @@ class MainController < UIViewController
 
     rmq.append(UIButton, :collection_button).on(:touch_up) do |sender|
       controller = CollectionController.new
-      self.navigationController.pushViewController(controller, animated: true)
+      rmq.view_controller.navigationController.pushViewController(controller, animated: true)
     end
 
     rmq.append(UIButton, :table_button).on(:touch_up) do |sender|
       controller = TableController.new
-      self.navigationController.pushViewController(controller, animated: true)
+      rmq.view_controller.navigationController.pushViewController(controller, animated: true)
     end
     
   end
@@ -101,7 +101,7 @@ class MainController < UIViewController
 
     rmq.append(UIView, :benchmark_section).tap do |q|
     
-      @title_label = q.append(UILabel, :title_label).get
+      @title_label = q.append!(UILabel, :title_label)
       q.append(UIButton, :run_benchmarks).on(:touch_down) do |sender|
 
         rmq(sender).apply_style(:run_benchmarks_disabled)
@@ -115,7 +115,7 @@ class MainController < UIViewController
 
         rmq.append(UILabel, :benchmarks_results_wrapper).tap do |o|
           o.animations.fade_in
-          o.append(UILabel, :benchmarks_results_label).get.text = self.benchmark
+          o.append(UILabel, :benchmarks_results_label).get.text = benchmark
         end
 
         rmq(sender).apply_style(:run_benchmarks)

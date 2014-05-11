@@ -54,7 +54,17 @@ module RubyMotionQuery
           f.origin.x = h[:l] || h[:left] || f.origin.x
           f.origin.y = h[:t] || h[:top] || f.origin.y
           f.size.width = h[:w] || h[:width] || f.size.width
-          f.size.height =h[:h] || h[:height] || f.size.height
+          f.size.height = h[:h] || h[:height] || f.size.height
+
+          if sv = @view.superview
+            if fr = (h[:from_right] || h[:fr])
+              f.origin.x = sv.bounds.size.width - f.size.width - fr
+            end
+
+            if fb = (h[:from_bottom] || h[:fb])
+              f.origin.y = sv.bounds.size.height - f.size.height - fb
+            end
+          end
 
           @view.frame = f
         else
@@ -63,6 +73,17 @@ module RubyMotionQuery
       end
       def frame
         @view.frame
+      end
+
+      # Sets the frame using the Window's coordinates
+      def absolute_frame=(value)
+        self.frame = value
+
+        f = @view.frame
+        window_point = @view.convertPoint(f.origin, fromView: nil)
+        f.origin.x += window_point.x
+        f.origin.y += window_point.y
+        @view.frame = f
       end
 
       def padded=(value)
@@ -132,13 +153,13 @@ module RubyMotionQuery
       end
 
       def from_bottom=(value)
-        if superview = @view.superview
-          self.top = superview.bounds.size.height - self.height - value
+        if sv = @view.superview
+          self.top = sv.bounds.size.height - self.height - value
         end
       end
       def from_bottom
-        if superview = @view.superview
-          superview.bounds.size.height - self.top
+        if sv = @view.superview
+          sv.bounds.size.height - self.top
         end
       end
 
@@ -281,6 +302,48 @@ module RubyMotionQuery
 
       def layer
         @view.layer
+      end
+
+      def opacity=(value)
+        @view.layer.opacity = value
+      end
+      def opacity
+        @view.layer.opacity
+      end
+
+      def border_width=(value)
+        @view.layer.borderWidth = value
+      end
+      def border_width
+        @view.layer.borderWidth
+      end
+
+      def border_color=(value)
+        if value.is_a?(UICachedDeviceRGBColor)
+          @view.layer.setBorderColor(value.CGColor)
+        else
+          @view.layer.setBorderColor value
+        end
+      end
+
+      def border_color
+        @view.layer.borderColor
+      end
+
+      def corner_radius=(value = 2)
+        @view.layer.cornerRadius = value
+      end
+
+      def corner_radius
+        @view.layer.cornerRadius
+      end
+
+      def masks_to_bounds=(value)
+        @view.layer.masksToBounds = value
+      end
+
+      def masks_to_bounds
+        @view.layer.masksToBounds
       end
 
     end

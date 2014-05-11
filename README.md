@@ -13,7 +13,7 @@ A fast, non-polluting, chaining, front-end library. It’s like jQuery for [Ruby
 
 Also this 6 minute **[intro video](https://www.youtube.com/watch?v=2ihGjCI2DYE)**
 
-And this 36 minute video: **[Creating an Image Browser app in RubyMotion and RubyMotionQuery](https://www.youtube.com/watch?v=4eCNaxqNhKA)**
+And this 36 minute video: **[Creating an Image Browser app in RubyMotion and RubyMotionQuery](http://infinitered.com/2013/12/26/creating-an-image-browser-app-in-rubymotion-and-rubymotionquery-rmq/)**
 
 ----------
 
@@ -100,9 +100,7 @@ for **bleeding edge**, add this to your `Gemfile`:
 
 ## Deprecation
 
-- **RubyMotionQuery::RMQ.weak_ref(object)** - no longer needed post RubyMotion 2.18
 - **UIView#rmq_did_create(self_in_rmq)** - *Use rmq_build instead*
-
 
 <br />
 
@@ -119,9 +117,9 @@ for **bleeding edge**, add this to your `Gemfile`:
 
 *Clone this repo and run the example app to see an example of use.*
 
-	git clone git@github.com:infinitered/rmq.git
-	cd rmq
-	rake
+  git clone git@github.com:infinitered/rmq.git
+  cd rmq
+  rake
 
 The example app works in any orientation, on both iPhone and iPad. Notice how the benchmark popup is done with RMQ, then think about how you'd do that without it.
 
@@ -253,7 +251,7 @@ I recomend you play around with it, do this:
 
 <br />
 
-<br />
+=======
 
 ### Selectors
 
@@ -266,6 +264,115 @@ I recomend you play around with it, do this:
  - text: 'you can select via attributes also'
  - :another_tag, UILabel, text: 'an array' <- this is an "or", use .and for and
 
+The more common use is to select any view or views you have assigned to variables, then perform actions on them. For example:
+
+```ruby
+view_1 = UIView.alloc.initWithFrame([[10,10],[100, 10]])
+view_2 = UIView.alloc.initWithFrame([[10,20],[100, 10]])
+@view_3 = rmq.append(UIView, :some_style).get
+
+rmq(view_1).layout(l: 20, t: 40, w: 80, h: 20)
+
+rmq(view_1, view_2, @view_3).hide
+a = [view_1, view_2, @view_3]
+
+rmq(a).distribute(:vertical, margin: 10)
+
+rmq(a).on(:tap) do |sender|
+   puts 'Tapped'
+end
+```
+
+
+<br />
+
+### Subviews - appending, creating, etc
+
+----
+
+* **build**: takes an existing view, applies the style if it exists, then calls rmq_build method
+* **create**: creates the view when given the class, or uses an existing view you pass it, then does a [build]
+* **append**: [create] + appends the view to the end of the subview tree or to then end of the children of a view (if called on an rmq object with that view in it)
+* **prepend**: Same as [append], but inserts the view to beginning of the subview tree (overall or view's children)
+* **insert**: Same as [append], but inserts the view at the index of the subview tree (overall or view's children)
+
+```ruby
+rmq.append(UILabel) # Creates a UILabel in the current controller
+rmq.append(UILabel, :my_label_style)
+rmq.append(UILabel.alloc.initWithFrame([[0,0],[10,10]]), :my_label_style)
+
+rmq(my_view).append(UIButton)
+rmq(my_view).remove
+rmq(my_vuew).children.remove
+
+rmq(UIView).append(UIButton, :delete_me) # A custom button for all views
+
+rmq.unshift(UILabel) # Adds to index 0 of the subviews
+rmq.unshift(UILabel, :my_style)
+rmq.insert(UILabel, at_index: 2)
+rmq.insert(UILabel, at_index: 2, style: :my_style)
+rmq.insert(UILabel, below_view: some_view_of_mine)
+rmq.insert(UILabel, below_view: some_view_of_mine, style: :my_style)
+
+rmq(my_view).parent  # .superview works too
+rmq(my_view).parents # all parents up the tree, up to the root
+rmq(my_view).children
+rmq(my_view).find # children, grandchildren, etc
+rmq.root_view
+rmq.view_controller
+```
+
+Often when appending a subview, you assign the view to a instance variable, like so:
+
+```ruby
+@name = rmq.append(UILabel, :name).get
+```
+
+The **.get** returns the actual view. Without it you'll get a reference to an rmq instance, which is how
+chaining works.
+
+This is such a common pattern, an RMQ user (https://github.com/shreeve) created append!, which I've included into RMQ.
+The ! version of append or create returns the view directly:
+
+```ruby
+@name = rmq.append!(UILabel, :name)
+# Or the even shorter:
+@name = rmq.append! UILabel, :name
+```
+
+
+
+
+#### Create a view
+If you want to create a view but not add it to the subviews of any other view, you can
+use #create. It's basically #append without the actual appending.
+This is very handy for stuff like table cells:
+
+```ruby
+# In your controller that is a delegate for a UITableView
+def tableView(table_view, cellForRowAtIndexPath: index_path)
+  cell = table_view.dequeueReusableCellWithIdentifier(CELL_IDENTIFIER) || begin
+    rmq.create(StoreCell, :store_cell, reuse_identifier: CELL_IDENTIFIER).get
+
+    # If you want to change the style of the cell, you can do something like this:
+    # rmq.create(StoreCell, :store_cell, reuse_identifier: CELL_IDENTIFIER, cell_style: UITableViewCellStyleSubtitle).get
+  end
+end
+
+# Your cell
+class StoreCell < UITableViewCell
+  def rmq_build
+    q = rmq(self.contentView)
+    q.append(UILabel, :title_label) # <- this works even though this object isn't in a controller
+
+    # Use built in views, this assumes you're using the UITableViewCellStyleSubtitle style for the cell
+    q.build(self.textLabel, :cell_label)
+    q.build(self.imageView, :cell_image)
+    q.build(self.detailTextLabel, :cell_label_detail)
+  end
+end
+```
+
 
 <br />
 
@@ -273,23 +380,33 @@ I recomend you play around with it, do this:
 
 ----
 
+Moving around the subview tree.
+
+Used often:
+
+ - view_controller
+ - root_view # View of the view_controller
+
+The rest of traversing isn't used too often, but when you need it, it's super handy. The most common methods used are:
+
+ - window # Window of the root_view
  - all
+ - closest
+ - find
+
+These are less common:
+
  - and
  - not
  - and_self
- - back  - rmq(test_view).find(UIImageView).tag(:foo).back.find(UILabel).tag(:bar)
- - find
+ - back  - _rmq(test_view).find(UIImageView).tag(:foo).back.find(UILabel).tag(:bar)_
  - children
  - siblings
  - next
  - prev
- - closest
  - parent
  - parents
  - filter
- - view_controller
- - root_view # View of the view_controller
- - window # Window of the root_view
 
 
 <br />
@@ -319,6 +436,70 @@ You can also do **rmq.length** and **rmq[0]** like an array
 **.to_a** gives you an actual array, so will **.get** (this is preferred)
 
 
+
+<br />
+
+### Layout/Frame System & Position
+
+----
+
+
+```
+Options for layout, move, and frame:
+
+:full
+:left    :l    :from_right      :fr
+:top     :t    :from_right      :fb
+:width   :w
+:height  :h
+
+Options for nudge:
+
+:left    :l
+:right   :r
+:up      :u
+:down    :d
+
+Values for each option can be:
+
+signed int
+float
+```
+
+```ruby
+# In a style
+def some_style(st)
+  st.frame = {l: 20, t: 20, w: 100, h: 50}
+end
+
+
+# Layout, move, or resize selected views
+rmq(your_view).layout(left: 20, top: 20, width: 100, height: 50)
+rmq(your_view).layout(l: 20)
+rmq(your_view).layout(left: 20)
+rmq(your_view).layout(l: 20, t: 20, w: 100, h: 50)
+rmq(your_view).layout(left: 20, top: 20, width: 100, height: 50)
+
+rmq(your_view).move(left: 20) # alias for layout
+rmq(your_view).move(l: 30, t: 50) # alias for layout
+rmq(your_view).resize(width: 100, height: 50) # alias for layout
+
+# Nudge pushes them in a direction
+rmq(your_view).nudge(d: 20)
+rmq(your_view).nudge(down: 20)
+rmq(your_view).nudge(l: 20, r: 20, u: 100, d: 50)
+rmq(your_view).nudge(left: 20, right: 20, up: 100, down: 50)
+
+# Distribute
+rmq(UIButton).distribute
+rmq(UIButton).distribute(:vertical)
+rmq(UIButton).distribute(:horizontal)
+rmq(UIButton).distribute(:vertical, margin: 20)
+rmq(my_view, my_other_view, third_view).distribute(:vertical, margin: 10)
+rmq(UIButton).distribute(:vertical, margins: [5,5,10,5,10,5,10,20])
+```
+
+
 <br />
 
 ### Events and Gestures
@@ -335,7 +516,7 @@ rmq(UIView).on(:tap){|sender| rmq(sender).hide}
 
 # Adding an Event during creation
 view_q = rmq.append(UIView).on(:tap) do |sender, event|
-	# do something here
+  # do something here
 end
 
 # removing an Event
@@ -394,6 +575,10 @@ If you see Event, just remember that's either an event or gesture. I decided to 
 :pinch
 :rotate
 :swipe
+:swipe_up
+:swipe_down
+:swipe_left
+:swipe_right
 :pan
 :long_press
 ```
@@ -469,63 +654,19 @@ rmq(my_text_field).focus # or .become_first_responder
 
 <br />
 
-### Subviews - appending, creating, etc
-
-----
-
-```ruby
-rmq.append(UILabel) # Creates a UILabel in the current controller
-rmq.append(UILabel, :my_label_style)
-rmq.append(UILabel.alloc.initWithFrame([[0,0],[10,10]]), :my_label_style)
-
-rmq(my_view).append(UIButton)
-rmq(my_view).remove
-rmq(my_vuew).children.remove
-
-rmq(UIView).append(UIButton, :delete_me) # A custom button for all views
-
-rmq.unshift(UILabel) # Adds to index 0 of the subviews
-rmq.unshift(UILabel, :my_style)
-rmq.insert(UILabel, at_index: 2)
-rmq.insert(UILabel, at_index: 2, style: :my_style)
-rmq.insert(UILabel, below_view: some_view_of_mine)
-rmq.insert(UILabel, below_view: some_view_of_mine, style: :my_style)
-
-rmq(my_view).parent  # .superview works too
-rmq(my_view).parents # all parents up the tree, up to the root
-rmq(my_view).children
-rmq(my_view).find # children, grandchildren, etc
-rmq.root_view
-rmq.view_controller
-```
-
-#### Create a view
-If you want to create a view but not add it to the subviews of any other view, you can
-use #create. It's basically #append without the actual appending.
-This is very handy for stuff like table cells:
-
-```ruby
-# In your controller that is a delegate for a UITableView
-def tableView(table_view, cellForRowAtIndexPath: index_path)
-  cell = table_view.dequeueReusableCellWithIdentifier(CELL_IDENTIFIER) || begin
-    rmq.create(StoreCell, :store_cell, cell_identifier: CELL_IDENTIFIER).get
-  end
-end
-
-# Your cell
-class StoreCell < UITableViewCell
-  def rmq_build
-    rmq(self).append(UILabel, :title_label) # <- this works even though this object isn't in a controller
-  end
-end
-```
-
-
-<br />
-
 ### Animate
 
 ----
+
+The most basic:
+
+```ruby
+rmq.animate do |q|
+  rmq(UIButton).nudge r: 40
+end
+```
+
+Some more options, this time it is animating a selected view:
 
 ```ruby
 rmq(my_view).animate(
@@ -563,6 +704,8 @@ rmq(selectors).animate(
 
 ----
 
+See animate above.
+
 #### Current animations included:
 
 ```ruby
@@ -573,6 +716,8 @@ rmq(my_view).animations.fade_out(duration: 0.8)
 
 rmq(my_view).animations.blink
 rmq(my_view).animations.throb
+rmq(my_view).animations.sink_and_throb
+rmq(my_view).animations.land_and_sink_and_throb
 rmq(my_view).animations.drop_and_spin
 
 rmq.animations.start_spinner
@@ -629,39 +774,6 @@ font.medium
 font.system(14)
 ```
 
-
-<br />
-
-### Position (moving, sizing, and nudging)
-
-----
-
-```ruby
-# Layout, move, or resize selected views
-rmq(your_view).layout(left: 20, top: 20, width: 100, height: 50)
-rmq(your_view).layout(l: 20)
-rmq(your_view).layout(left: 20)
-rmq(your_view).layout(l: 20, t: 20, w: 100, h: 50)
-rmq(your_view).layout(left: 20, top: 20, width: 100, height: 50)
-
-rmq(your_view).move(left: 20) # alias for layout
-rmq(your_view).move(l: 30, t: 50) # alias for layout
-rmq(your_view).resize(width: 100, height: 50) # alias for layout
-
-# Nudge pushes them in a direction
-rmq(your_view).nudge(d: 20)
-rmq(your_view).nudge(down: 20)
-rmq(your_view).nudge(l: 20, r: 20, u: 100, d: 50)
-rmq(your_view).nudge(left: 20, right: 20, up: 100, down: 50)
-
-# Distribute
-rmq(UIButton).distribute
-rmq(UIButton).distribute(:vertical)
-rmq(UIButton).distribute(:horizontal)
-rmq(UIButton).distribute(:vertical, margin: 20)
-rmq(my_view, my_other_view, third_view).distribute(:vertical, margin: 10)
-rmq(UIButton).distribute(:vertical, margins: [5,5,10,5,10,5,10,20])
-```
 
 <br />
 
@@ -767,7 +879,7 @@ rmq.device.iphone?
 rmq.device.four_inch?
 rmq.device.retina?
 
-# return values are :unknown, :portrait, :portrait_upside_down, :landscape_Left,
+# return values are :unknown, :portrait, :portrait_upside_down, :landscape_left,
 # :landscape_right, :face_up, :face_down
 rmq.device.orientation
 rmq.device.landscape?
@@ -1057,15 +1169,13 @@ class MainStylesheet < ApplicationStylesheet
   end
 
   def section(st)
-    st.frame = {w: 270, h: 110}
+    st.frame = {from_bottom: PADDING, w: 270, h: 110}
 
     if landscape? && iphone?
       st.left = PADDING
     else
       st.centered = :horizontal
     end
-
-    st.from_bottom = PADDING
 
     st.z_position = 1
     st.background_color = color.battleship_gray
@@ -1200,7 +1310,8 @@ Here is a silly example, showing you a bunch of methods the UIViewStyler gives y
 def ui_view_kitchen_sink(st)
   st.frame = {l: 1, t: 2, w: 3, h: 4}
   st.frame = {left: 1, top: 2, width: 3, height: 4}
-  st.frame = {left: 10}
+  st.frame = {from_right: 1, from_bottom: 2, width: 3, height: 4}
+  st.frame = {fr: 1, fb: 2, w: 3, h: 4}
   st.left = 20
   st.top = 30
   st.width = 40
@@ -1222,16 +1333,22 @@ def ui_view_kitchen_sink(st)
   st.hidden = false
   st.z_position = 66
   st.opaque = false
+  st.clips_to_bounds = false
+  st.hidden = true
+  st.content_mode = UIViewContentModeBottomLeft
 
   st.background_color = color.red
+  # TODO test background_image
 
   st.scale = 1.5
   st.rotation = 45
+  st.tint_color = color.blue
+  st.layer.cornerRadius = 5
 end
 ```
 
 ##### UIControlStyler
-	Nothing yet
+  Nothing yet
 
 ##### UILabelStyler
 

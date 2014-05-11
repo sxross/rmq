@@ -17,9 +17,9 @@ class <%= @name_camel_case %>ControllerStylesheet < ApplicationStylesheet
       cl.itemSize = [cell_size[:w], cell_size[:h]]
       #cl.scrollDirection = UICollectionViewScrollDirectionHorizontal
       #cl.headerReferenceSize = [cell_size[:w], cell_size[:h]]
-      cl.minimumInteritemSpacing = @margin 
-      cl.minimumLineSpacing = @margin 
-      #cl.sectionInsert = [0,0,0,0]
+      cl.minimumInteritemSpacing = @margin
+      cl.minimumLineSpacing = @margin
+      #cl.sectionInset = [0,0,0,0]
     end
   end
 end

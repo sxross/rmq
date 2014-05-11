@@ -7,7 +7,7 @@ module RubyMotionQuery
     #   rmq(my_view).resize(h: 10, w: 100)
     #
     # @return [RMQ]
-    def layout(opts) 
+    def layout(opts)
       # TODO, add centered and from_bottom and from_top, and bottom and top
       # TODO, add animate option
       left = opts[:left] || opts[:l] || opts[:x]
@@ -28,7 +28,7 @@ module RubyMotionQuery
     alias :resize :layout
 
     # @return [RMQ]
-    def nudge(opts) 
+    def nudge(opts)
       left = opts[:left] || opts[:l] || 0
       right = opts[:right] || opts[:r] || 0
       up = opts[:up] || opts[:u] || 0
@@ -61,7 +61,12 @@ module RubyMotionQuery
 
       selected.each_with_index do |view, i|
         st = self.styler_for(view)
-        next if st.height == 0
+
+        if type == :vertical
+          next if st.height == 0
+        else
+          next if st.width == 0
+        end
 
         view_margin = if (margins && margins[i])
           margins[i]
@@ -69,16 +74,15 @@ module RubyMotionQuery
           margin
         end
 
-        current_end = (st.top - view_margin) unless current_end
-
-        if type == :horizontal
-          st.left = current_end + view_margin
-          current_end = st.right
-        else
+        if type == :vertical
+          current_end = (st.top - view_margin) unless current_end
           st.top = current_end + view_margin
           current_end = st.bottom
+        else
+          current_end = (st.left - view_margin) unless current_end
+          st.left = current_end + view_margin
+          current_end = st.right
         end
-        
       end
 
       self
